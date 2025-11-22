@@ -1,4 +1,5 @@
 // scraper_final.js - 实时汇率爬虫 (适配 waihui999.com - 修正版)
+require('dotenv').config();
 const axios = require('axios');
 const cheerio = require('cheerio');
 const mysql = require('mysql2/promise');
@@ -15,10 +16,10 @@ const RATE_SELECTOR = '#toCost';
 // 3. 数据库连接配置
 // 【重要：请务必修改密码！】
 const dbConfig = {
-    host: '127.0.0.1',
-    user: 'heikeji_db',      // 你的数据库用户名
-    password: 'tAGDB5zmYy2LJhGJ', // 【一定要写真密码！】
-    database: 'heikeji_db',  // 你的数据库名
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD, // 安全了！
+    database: process.env.DB_NAME,
     waitForConnections: true, connectionLimit: 1
 };
 
