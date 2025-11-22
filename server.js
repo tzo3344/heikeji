@@ -1,4 +1,5 @@
 // server.js - 赛博朋克版完美后台 (自动修复路径 + 爬虫)
+require('dotenv').config(); // 引入环境变量加载工具
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -28,13 +29,15 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 }
 
 // ============ 💾 2. 数据库配置 ============
+
+// 使用环境变量中的数据库配置
 const dbConfig = {
-    host: '127.0.0.1', 
-    user: 'heikeji_db', 
-    password: 'tAGDB5zmYy2LJhGJ', 
-    database: 'heikeji_db', 
-    waitForConnections: true, 
-    connectionLimit: 10, 
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD, // 这里不再是明文密码了！
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,
     queueLimit: 0
 };
 
