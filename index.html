@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黑科技微商动态定价系统 | Black Tech Pricing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        /* ============ 赛博朋克风格样式 ============ */
+        :root {
+            --primary-color: #00e676; /* 赛博绿 */
+            --accent-color: #2979ff;  /* 科技蓝 */
+            --bg-overlay: rgba(10, 14, 23, 0.85); 
+            --card-bg: rgba(30, 35, 45, 0.75); /* 磨砂玻璃背景 */
+            --input-bg: rgba(0, 0, 0, 0.3);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --text-main: #ffffff;
+            --text-secondary: #b0b3b8;
+        }
+
+        * { box-sizing: border-box; outline: none; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('https://www.mybest.com.my/assets/img/1920x1080/img3.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 顶部 HUD 仪表盘 */
+        .backend-simulator-bar {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--primary-color);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 30px rgba(0, 230, 118, 0.1);
+        }
+
+        .hud-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        #simulatedLiveRate {
+            font-family: 'Courier New', monospace;
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-shadow: 0 0 10px rgba(0, 230, 118, 0.6);
+            padding: 0 5px;
+            transition: all 0.3s ease;
+        }
+
+        .refresh-tag {
+            font-size: 10px;
+            background: var(--primary-color);
+            color: black;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        .home-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.3s;
+            margin-left: 20px;
+        }
+        .home-btn:hover { background: var(--accent-color); border-color: var(--accent-color); }
+
+        /* 主容器 */
+        .container {
+            width: 95%;
+            max-width: 600px;
+            margin: 40px auto;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(41,121,255,0.1) 0%, rgba(0,0,0,0) 70%);
+            pointer-events: none;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 22px;
+            margin-bottom: 30px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            background: linear-gradient(90deg, #fff, #b0b3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        h2 {
+            font-size: 14px;
+            color: var(--primary-color);
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-group { margin-bottom: 20px; position: relative; }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .input-group input[type="number"], 
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            transition: 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .input-group input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px rgba(41, 121, 255, 0.3);
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .input-helper { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 5px; }
+
+        .image-upload-item {
+            width: 100%;
+            height: 120px;
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.3s;
+            background: rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-upload-item:hover {
+            border-color: var(--primary-color);
+            background: rgba(0, 230, 118, 0.05);
+        }
+
+        .plus-icon { font-size: 40px; color: rgba(255,255,255,0.3); transition: 0.3s; }
+        .image-upload-item:hover .plus-icon { color: var(--primary-color); transform: scale(1.1); }
+        .image-upload-item input { position: absolute; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        #productImagePreview { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; }
+
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #00b0ff 100%);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 10px 20px rgba(0, 230, 118, 0.2);
+            transition: transform 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(0, 230, 118, 0.4);
+        }
+
+        .btn-primary:active { transform: translateY(1px); }
+
+        #poster-result {
+            margin-top: 35px;
+            padding: 25px;
+            background: rgba(0, 230, 118, 0.1);
+            border: 1px solid var(--primary-color);
+            border-radius: 12px;
+            text-align: center;
+            display: none;
+            animation: slideUp 0.5s ease;
+        }
+
+        #poster-result h3 { margin: 0 0 10px 0; color: var(--primary-color); font-size: 18px; }
+
+        .link-box {
+            background: rgba(0,0,0,0.6);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px dashed rgba(255,255,255,0.3);
+            margin-top: 15px;
+            word-break: break-all;
+            position: relative;
+        }
+
+        .simulated-link {
+            color: #fff;
+            text-decoration: none;
+            font-family: monospace;
+            font-size: 14px;
+            display: block;
+        }
+        
+        .simulated-link:hover { text-decoration: underline; color: var(--primary-color); }
+
+        #customer-view { display: none; text-align: center; }
+        
+        .product-image-display {
+            width: 100%;
+            height: 300px;
+            background-color: #333;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            /* 关键：确保图片居中填充 */
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .customer-price-value {
+            font-size: 56px;
+            font-weight: 900;
+            color: var(--primary-color);
+            text-shadow: 0 0 20px rgba(0, 230, 118, 0.4);
+            line-height: 1;
+        }
+
+        .customer-currency { font-size: 24px; color: white; }
+        .live-rate-tag {
+            display: inline-block;
+            margin-top: 15px;
+            background: rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .container { padding: 25px; margin: 20px auto; width: 92%; }
+            .customer-price-value { font-size: 42px; }
+            .backend-simulator-bar { flex-direction: column; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="backend-simulator-bar" id="backendBar">
+    <div class="hud-content">
+        <span>SYSTEM STATUS: <span class="refresh-tag">LIVE</span></span>
+        <span>1 RMB ≈ <span id="simulatedLiveRate">---.----</span> MMK</span>
+    </div>
+    <button class="home-btn" onclick="window.location.href=window.location.pathname">🔄 重置系统</button>
+</div>
+
+<div class="container">
+
+    <div id="merchant-view">
+        <h1>🚀 创建黑科技动态定价</h1>
+        
+        <div class="input-group">
+            <label>上传商品图片</label>
+            <div class="image-upload-item">
+                <input type="file" id="productImageInput" accept="image/*" onchange="previewImage(event)">
+                <span class="plus-icon" id="plusIcon">+</span>
+                <img id="productImagePreview" src="" alt="预览" style="display: none;">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px;">
+            <div class="input-group" style="flex: 1;">
+                <label for="costRMB">进货价 (RMB)</label>
+                <input type="number" id="costRMB" placeholder="¥ 0.00">
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label for="profitMargin">固定利润率 (%)</label>
+                <input type="number" id="profitMargin" value="30">
+            </div>
+        </div>
+        
+        <div class="input-group" style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); padding: 15px; border-radius: 8px;">
+            <label for="optionalRateInput" style="color: #ffca28;">⚡ 锁定汇率 (可选)</label>
+            <input type="number" id="optionalRateInput" placeholder="留空则使用系统实时汇率" style="background: rgba(0,0,0,0.3); border-color: rgba(255, 193, 7, 0.3);">
+            <div class="input-helper" style="color: #ffca28;">注意：填写后将不再跟随市场波动</div>
+        </div>
+
+        <h2>📦 物流参数</h2>
+        <div style="display: flex; gap: 15px;">
+            <div class="input-group" style="flex: 1;">
+                <label for="weightKG">重量 (KG)</label>
+                <input type="number" id="weightKG" step="0.1" value="0.5">
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label for="shippingRate">运费 (MMK/kg)</label>
+                <input type="number" id="shippingRate" value="5000">
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="generatePoster()">⚡ 生成智能链接</button>
+
+        <div id="poster-result">
+            <h3>✅ 商品链接已生成</h3>
+            <p style="font-size: 13px; color: #ccc; margin-bottom: 5px;">复制下方代码发送给客户</p>
+            <div class="link-box">
+                <a id="customerLink" class="simulated-link" href="#" target="_blank">Generating...</a>
+            </div>
+            <div style="margin-top: 10px; font-size: 12px; color: var(--primary-color); opacity: 0.8;">
+                ( 点击链接可进入客户预览模式 )
+            </div>
+        </div>
+    </div>
+
+    <div id="customer-view">
+        <div class="product-image-display" id="customerProductImage">Loading...</div>
+        <div class="customer-price-box">
+            <div style="color: var(--text-secondary); font-size: 14px; margin-bottom: 10px; letter-spacing: 2px; text-transform: uppercase;">Current Market Price</div>
+            <div class="customer-price-value">
+                <span id="dynamicPriceMMK">---</span><span class="customer-currency"> MMK</span>
+            </div>
+            <div class="live-rate-tag">
+                📡 数据来源: <span id="rateSourceText" style="color: var(--primary-color); font-weight: bold;">连接中...</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ============ ⚠️ 重点：请修改这里 ⚠️ ============
+    // 把 localhost 换成你的【服务器公网IP】
+    const API_BASE_URL = 'http://210.56.48.214:3000/api'; 
+    // ================================================
+
+    const merchantView = document.getElementById('merchant-view');
+    const customerView = document.getElementById('customer-view');
+    const simRateDisplay = document.getElementById('simulatedLiveRate');
+    const backendBar = document.getElementById('backendBar');
+
+    const productImageInput = document.getElementById('productImageInput');
+    const productImagePreview = document.getElementById('productImagePreview');
+    const plusIcon = document.getElementById('plusIcon');
+    const costInput = document.getElementById('costRMB');
+    const profitMarginInput = document.getElementById('profitMargin');
+    const optionalRateInput = document.getElementById('optionalRateInput');
+    const weightKGInput = document.getElementById('weightKG');
+    const shippingRateInput = document.getElementById('shippingRate');
+    const posterResult = document.getElementById('poster-result');
+    const customerLink = document.getElementById('customerLink');
+    const customerProductImage = document.getElementById('customerProductImage');
+    const dynamicPriceDisplay = document.getElementById('dynamicPriceMMK');
+    const rateSourceText = document.getElementById('rateSourceText');
+
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('product_id');
+        
+        if (productId) {
+            showCustomerView(productId);
+        } else {
+            merchantView.style.display = 'block';
+            backendBar.style.display = 'flex';
+            fetchCurrentSystemRate(); 
+            setInterval(fetchCurrentSystemRate, 5000);
+        }
+    };
+
+    function fetchCurrentSystemRate() {
+        fetch(`${API_BASE_URL}/system-rate`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                const oldRate = simRateDisplay.textContent;
+                simRateDisplay.textContent = data.rate;
+                if (oldRate !== "---.----" && oldRate != data.rate) {
+                    simRateDisplay.style.color = '#fff'; 
+                    simRateDisplay.style.textShadow = '0 0 20px #fff';
+                    setTimeout(() => { 
+                        simRateDisplay.style.color = 'var(--primary-color)'; 
+                        simRateDisplay.style.textShadow = '0 0 10px rgba(0, 230, 118, 0.6)';
+                    }, 500);
+                }
+            }
+        }).catch(() => { simRateDisplay.textContent = "OFFLINE"; simRateDisplay.style.color = 'red'; });
+    }
+
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                productImagePreview.src = e.target.result;
+                productImagePreview.style.display = 'block';
+                plusIcon.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function generatePoster() {
+        const cost = costInput.value;
+        const margin = profitMarginInput.value;
+        const weight = weightKGInput.value;
+        const shipRate = shippingRateInput.value;
+        const imageFile = productImageInput.files[0];
+        const optionalRate = optionalRateInput.value;
+        
+        if (!cost || !margin || !weight || !shipRate || !imageFile) {
+            alert("⚠️ 请填写所有必填项并上传图片"); return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        formData.append('cost', cost);
+        formData.append('margin', margin);
+        formData.append('weight', weight);
+        formData.append('shiprate', shipRate);
+        if (optionalRate) formData.append('optionalRate', optionalRate);
+
+        const btn = document.querySelector('.btn-primary');
+        const originalText = btn.textContent;
+        btn.textContent = '⚡ 系统计算中...'; btn.disabled = true;
+
+        fetch(`${API_BASE_URL}/products`, { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const baseUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
+                const dynamicUrl = `${baseUrl}?product_id=${data.productUuid}`;
+                posterResult.style.display = 'block';
+                customerLink.href = dynamicUrl; 
+                customerLink.textContent = dynamicUrl;
+                posterResult.scrollIntoView({ behavior: 'smooth' });
+                costInput.value = ''; optionalRateInput.value = '';
+            } else { alert("Error: " + data.message); }
+        })
+        .catch(e => alert("连接服务器失败"))
+        .finally(() => { btn.textContent = originalText; btn.disabled = false; });
+    }
+
+    // 【关键逻辑修正】让图片地址自动跟随服务器 IP
+    function showCustomerView(productId) {
+        merchantView.style.display = 'none';
+        backendBar.style.display = 'none';
+        customerView.style.display = 'block';
+        document.querySelector('.container').style.marginTop = '10vh';
+
+        fetch(`${API_BASE_URL}/products/${productId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                const pd = data.data;
+
+                // 1. 拿到图片相对路径
+                const rawPath = pd.imageUrl;
+                // 【修正】使用当前网站的域名（不带3000端口），让Nginx来服务图片
+                // window.location.origin 会自动获取如 http://988caobi.com
+                const serverDomain = window.location.origin;
+                // 3. 自动拼装完整地址
+                const fullImageUrl = rawPath.startsWith('http') ? rawPath : (serverDomain + rawPath);
+
+                customerProductImage.style.backgroundImage = `url('${fullImageUrl}')`;
+                customerProductImage.textContent = '';
+                dynamicPriceDisplay.textContent = pd.finalPriceMMK.toLocaleString();
+                rateSourceText.textContent = pd.details.rateSource;
+            } else {
+                customerProductImage.textContent = '链接失效或商品已删除';
+                alert(data.message);
+            }
+        })
+        .catch(e => { console.error(e); alert("数据加载失败"); });
+    }
+</script>
+</body>
+</html>
